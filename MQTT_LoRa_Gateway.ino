@@ -3,11 +3,12 @@
 #include <MKRGSM.h>             //usefull to work with an MKR board
 #include <MQTT.h>
 #include "Gateway_settings.h"
+#include "uptime.h"
 
 
 String datetime;
 String gatewayStatus;
-const int FW_VERSION = FIRMWARE_VERSION;
+const int FW_VERSION = 105;
 const int debug = IS_DEBUG;
 const int BATT_POLL_INT_M = POLL_BATT_MINUTE_INTERVAL;
 String gateway = GATEWAY_NAME;
@@ -265,7 +266,7 @@ void gatewayStatusPing() {
   long int timeis=gsmAccess.getTime();
   rtc.setEpoch(timeis);
   datetime = nowthatIcanread();
-  gatewayStatus = "{\"Gateway_Name\":\"" + gateway + "\",\"Firmware_Version\":\"" + String(FW_VERSION) + "\",\"Battery_Voltage\":\"" + String(battV) + "\",\"Uptime\":\"" + String(millis()) + "\",\"Last_Update\":\"" + datetime + "\",\"Status\":\"Alive\"}";
+  gatewayStatus = "{\"Gateway_Name\":\"" + gateway + "\",\"Firmware_Version\":\"" + String(FW_VERSION) + "\",\"Battery_Voltage\":\"" + String(battV) + "\",\"Uptime\":\"" + uptimeFormat() + "\",\"Last_Update\":\"" + datetime + "\",\"Status\":\"Alive\"}";
     SerialUSB.println("Published: " + gatewayStatus);// To ensure status gets updated
       client.publish(gatewayTopic.c_str(), gatewayStatus.c_str(), gatewayStatus.length(), true, 1); //Retain latest message from gateway
   }
@@ -278,9 +279,18 @@ void gatewayStatusPing() {
 
 void updateLastWill() {
   datetime = nowthatIcanread();
-  gatewayStatus = "{\"Gateway_Name\":\"" + gateway + "\",\"Firmware_Version\":\"" + String(FW_VERSION) + "\",\"Battery_Voltage\":\"" + String(battV) + "\",\"Uptime\":\"" + String(millis()) + "\",\"Last_Update\":\"" + datetime + "\",\"Status\":\"Down\"}";
+  gatewayStatus = "{\"Gateway_Name\":\"" + gateway + "\",\"Firmware_Version\":\"" + String(FW_VERSION) + "\",\"Battery_Voltage\":\"" + String(battV) + "\",\"Uptime\":\"" + uptimeFormat() + "\",\"Last_Update\":\"" + datetime + "\",\"Status\":\"Down\"}";
   client.setWill(gatewayTopic.c_str(), gatewayStatus.c_str(), true, 1);
   }
+
+String uptimeFormat() {
+  String uptime = "days: ";
+  uptime.concat(uptime::getDays());
+  uptime.concat(", hours : ");
+  uptime.concat(uptime::getHours());
+  uptime.concat(", minutes: ");
+  uptime.concat(uptime::getMinutes());
+  return uptime;}
   
 void connectMQTT() {
     if (connected) {
