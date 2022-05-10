@@ -1,4 +1,4 @@
-#include "RH_RF95.h"
+#include "RH_RF95.h"            //RJ getting errors on MKR1400 V11
 #include "RTCZero.h"
 #include <MKRGSM.h>             //usefull to work with an MKR board
 #include <MQTT.h>
